@@ -4,26 +4,53 @@ import {
   StyleSheet,
   Text,
   View,
-  Animated,
   Modal,
   Dimensions,
 } from "react-native";
 import BackgroundImg from "./assets/image.jpeg";
-import React, { useState, createRef } from "react";
+import React, { useState, createRef, useEffect } from "react";
 import {
   PanGestureHandler,
   PinchGestureHandler,
   State,
 } from "react-native-gesture-handler";
 import { PressableScale } from "react-native-pressable-scale";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withRepeat,
+} from "react-native-reanimated";
+
+const handleRotation = (progress) => {
+  "worklet";
+  return `${progress.value * 2 * Math.PI}rad`;
+};
 
 export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
   const [panEnabled, setPanEnabled] = useState(false);
-  const scale = new Animated.Value(1);
+  // const scale = new Animated.Value(1);
   const translateX = new Animated.Value(0);
   const translateY = new Animated.Value(0);
   const width = Dimensions.get("window").width;
+
+  const progress = useSharedValue(1);
+  const scale = useSharedValue(2);
+
+  const reanimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: progress.value,
+      borderRadius: (progress.value * 100) / 2,
+      transform: [{ scale: scale.value }, { rotate: handleRotation(progress) }],
+    };
+  }, []);
+
+  useEffect(() => {
+    progress.value = withRepeat(withSpring(0.5), 10, true);
+    scale.value = withRepeat(withSpring(1), 10, true);
+  }, []);
 
   const MOCK_DATA = [
     {
@@ -95,41 +122,49 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={BackgroundImg}
-        style={{ width: width }}
-        resizeMode="contain"
+      <Animated.View
+        style={[
+          { height: 100, width: 100, backgroundColor: "blue" },
+          reanimatedStyle,
+        ]}
       />
-      {MOCK_DATA.map((item) => (
-        <React.Fragment key={item.macAddress}>
-          <PressableScale
-            activeScale={0.85}
-            onPress={() => setModalVisible(!modalVisible)}
-            style={[styles.button, { left: item.x }, { bottom: item.y }]}
-          >
-            <Text style={styles.text}>{item.type}</Text>
-          </PressableScale>
-          <Modal
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => setModalVisible(!modalVisible)}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <Text style={styles.modalText}>{item.type}</Text>
-                <Text style={styles.modalText}>{item.macAddress}</Text>
-                <Pressable
-                  style={[styles.modalButton, styles.buttonClose]}
-                  onPress={() => setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.buttonText}>Hide Modal</Text>
-                </Pressable>
-              </View>
-            </View>
-          </Modal>
-        </React.Fragment>
-      ))}
     </View>
+    // <View style={styles.container}>
+    //   <Image
+    //     source={BackgroundImg}
+    //     style={{ width: width }}
+    //     resizeMode="contain"
+    //   />
+    //   {MOCK_DATA.map((item) => (
+    //     <React.Fragment key={item.macAddress}>
+    //       <PressableScale
+    //         activeScale={0.85}
+    //         onPress={() => setModalVisible(!modalVisible)}
+    //         style={[styles.button, { left: item.x }, { bottom: item.y }]}
+    //       >
+    //         <Text style={styles.text}>{item.type}</Text>
+    //       </PressableScale>
+    //       <Modal
+    //         transparent={true}
+    //         visible={modalVisible}
+    //         onRequestClose={() => setModalVisible(!modalVisible)}
+    //       >
+    //         <View style={styles.centeredView}>
+    //           <View style={styles.modalView}>
+    //             <Text style={styles.modalText}>{item.type}</Text>
+    //             <Text style={styles.modalText}>{item.macAddress}</Text>
+    //             <Pressable
+    //               style={[styles.modalButton, styles.buttonClose]}
+    //               onPress={() => setModalVisible(!modalVisible)}
+    //             >
+    //               <Text style={styles.buttonText}>Hide Modal</Text>
+    //             </Pressable>
+    //           </View>
+    //         </View>
+    //       </Modal>
+    //     </React.Fragment>
+    //   ))}
+    // </View>
   );
 }
 
