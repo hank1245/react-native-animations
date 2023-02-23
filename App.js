@@ -1,96 +1,90 @@
-import {
-  Pressable,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-  Dimensions,
-} from "react-native";
-import BackgroundImg from "./assets/image.jpeg";
-import React, { useRef, useState } from "react";
-import {
-  PinchGestureHandler,
-  TapGestureHandler,
-} from "react-native-gesture-handler";
+import React, { useState } from "react";
+import { Dimensions, StyleSheet, Switch, Text, View } from "react-native";
 import Animated, {
-  useSharedValue,
+  interpolateColor,
   useAnimatedStyle,
-  useAnimatedGestureHandler,
-  runOnJS,
+  useDerivedValue,
+  useSharedValue,
   withTiming,
-  withSpring,
 } from "react-native-reanimated";
-import { MOCK_DATA } from "./constant";
-import Item from "./components/Item";
 
-const AnimatedImage = Animated.createAnimatedComponent(Image);
-const { width, height } = Dimensions.get("window");
+const Colors = {
+  dark: {
+    background: "#1E1E1E",
+    circle: "#252525",
+    text: "#F8F8F8",
+  },
+  light: {
+    background: "#F8F8F8",
+    circle: "#FFF",
+    text: "#1E1E1E",
+  },
+};
+
+const SWITCH_TRACK_COLOR = {
+  true: "rgba(256, 0, 256, 0.2)",
+  false: "rgba(0,0,0,0.1)",
+};
 
 export default function App() {
-  const scale = useSharedValue(1);
-  const focalX = useSharedValue(0);
-  const focalY = useSharedValue(0);
+  const [theme, setTheme] = useState("light");
 
-  const pinchHandler = useAnimatedGestureHandler({
-    onStart: () => {},
-    onActive: (event, context) => {
-      scale.value = event.scale;
-      focalX.value = event.focalX;
-      focalY.value = event.focalY;
-    },
-    onEnd: () => {
-      scale.value = withTiming(1);
-    },
-  });
+  const progress = useDerivedValue(() => {
+    return theme === "dark" ? withTiming(1) : withTiming(0);
+  }, [theme]);
 
-  const reanimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateX: focalX.value },
-        { translateY: focalY.value },
-        { translateX: -width / 2 },
-        { translateY: -height / 2 },
-        { scale: scale.value },
-        { translateX: -focalX.value },
-        { translateY: -focalY.value },
-        { translateX: width / 2 },
-        { translateY: height / 2 },
-      ],
-    };
+  const rStyle = useAnimatedStyle(() => {
+    const backgroundColor = interpolateColor(
+      progress.value,
+      [0, 1],
+      [Colors.light.background, Colors.dark.background]
+    );
+    return { backgroundColor };
   });
 
   return (
-    <View style={styles.container}>
-      <PinchGestureHandler onGestureEvent={pinchHandler}>
-        <Animated.View style={styles.animationContainer}>
-          <AnimatedImage
-            source={BackgroundImg}
-            style={[styles.background, reanimatedStyle]}
-          />
-          {MOCK_DATA.map((item, index) => (
-            <Item key={index} item={item} />
-          ))}
-        </Animated.View>
-      </PinchGestureHandler>
-    </View>
+    <Animated.View style={[styles.container, rStyle]}>
+      <Switch
+        value={theme === "dark"}
+        onValueChange={(toggled) => {
+          setTheme(toggled ? "dark" : "light");
+        }}
+        trackColor={SWITCH_TRACK_COLOR}
+        thumbColor={"violet"}
+      />
+    </Animated.View>
   );
 }
+
+const SIZE = Dimensions.get("window").width * 0.7;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#4f5555",
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
   },
-  animationContainer: {
-    flex: 1,
-    backgroundColor: "#4f5555",
-    justifyContent: "center",
+  circle: {
+    width: SIZE,
+    height: SIZE,
+    backgroundColor: "#FFF",
     alignItems: "center",
+    justifyContent: "center",
+    borderRadius: SIZE / 2,
+    shadowOffset: {
+      width: 0,
+      height: 20,
+    },
+    shadowRadius: 10,
+    shadowOpacity: 0.1,
+    elevation: 8,
   },
-  background: {
-    width: width,
-    height: height,
+  text: {
+    fontSize: 70,
+    textTransform: "uppercase",
+    fontWeight: "700",
+    letterSpacing: 14,
+    marginBottom: 35,
   },
 });
