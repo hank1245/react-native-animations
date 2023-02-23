@@ -42,16 +42,39 @@ export default function App() {
     return { backgroundColor };
   });
 
+  const rCircleStyle = useAnimatedStyle(() => {
+    const backgroundColor = interpolateColor(
+      progress.value,
+      [0, 1],
+      [Colors.light.circle, Colors.dark.circle]
+    );
+
+    return { backgroundColor };
+  });
+
+  const rTextStyle = useAnimatedStyle(() => {
+    const color = interpolateColor(
+      progress.value,
+      [0, 1],
+      [Colors.light.text, Colors.dark.text]
+    );
+
+    return { color };
+  });
+
   return (
     <Animated.View style={[styles.container, rStyle]}>
-      <Switch
-        value={theme === "dark"}
-        onValueChange={(toggled) => {
-          setTheme(toggled ? "dark" : "light");
-        }}
-        trackColor={SWITCH_TRACK_COLOR}
-        thumbColor={"violet"}
-      />
+      <Animated.Text style={[styles.text, rTextStyle]}>Theme</Animated.Text>
+      <Animated.View style={[styles.circle, rCircleStyle]}>
+        <Switch
+          value={theme === "dark"}
+          onValueChange={(toggled) => {
+            setTheme(toggled ? "dark" : "light");
+          }}
+          trackColor={SWITCH_TRACK_COLOR}
+          thumbColor={"violet"}
+        />
+      </Animated.View>
     </Animated.View>
   );
 }
