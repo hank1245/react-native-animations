@@ -8,14 +8,20 @@ import {
 } from "react-native";
 import BackgroundImg from "./assets/image.jpeg";
 import React, { useRef, useState } from "react";
-import { PinchGestureHandler } from "react-native-gesture-handler";
+import {
+  PinchGestureHandler,
+  TapGestureHandler,
+} from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   useAnimatedGestureHandler,
   runOnJS,
   withTiming,
+  withSpring,
 } from "react-native-reanimated";
+import { MOCK_DATA } from "./constant";
+import Item from "./components/Item";
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 const { width, height } = Dimensions.get("window");
@@ -42,33 +48,38 @@ export default function App() {
       transform: [
         { translateX: focalX.value },
         { translateY: focalY.value },
-        { translateX: -(width * 0.8) / 2 },
-        { translateY: -(height * 0.8) / 2 },
+        { translateX: -width / 2 },
+        { translateY: -height / 2 },
         { scale: scale.value },
         { translateX: -focalX.value },
         { translateY: -focalY.value },
-        { translateX: (width * 0.8) / 2 },
-        { translateY: (height * 0.8) / 2 },
+        { translateX: width / 2 },
+        { translateY: height / 2 },
       ],
     };
   });
 
   return (
-    <PinchGestureHandler onGestureEvent={pinchHandler}>
-      <Animated.View style={styles.animationContainer}>
-        <AnimatedImage
-          source={BackgroundImg}
-          style={[styles.background, reanimatedStyle]}
-        />
-      </Animated.View>
-    </PinchGestureHandler>
+    <View style={styles.container}>
+      <PinchGestureHandler onGestureEvent={pinchHandler}>
+        <Animated.View style={styles.animationContainer}>
+          <AnimatedImage
+            source={BackgroundImg}
+            style={[styles.background, reanimatedStyle]}
+          />
+          {MOCK_DATA.map((item, index) => (
+            <Item key={index} item={item} />
+          ))}
+        </Animated.View>
+      </PinchGestureHandler>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "green",
+    backgroundColor: "#4f5555",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -79,7 +90,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   background: {
-    width: width * 0.8,
-    height: height * 0.8,
+    width: width,
+    height: height,
   },
 });
