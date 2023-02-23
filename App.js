@@ -4,62 +4,82 @@ import {
   StyleSheet,
   Text,
   View,
-  Modal,
   Dimensions,
 } from "react-native";
 import BackgroundImg from "./assets/image.jpeg";
-import React, { useState, createRef, useEffect } from "react";
-import {
-  PanGestureHandler,
-  PinchGestureHandler,
-  State,
-} from "react-native-gesture-handler";
-import { PressableScale } from "react-native-pressable-scale";
+import React, { useRef, useState } from "react";
+import { PinchGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
-  withSpring,
-  withRepeat,
   useAnimatedGestureHandler,
-  useAnimatedScrollHandler,
+  runOnJS,
+  withTiming,
 } from "react-native-reanimated";
-import { translate } from "@shopify/react-native-skia";
-import Page from "./components/Page";
 
-const Words = ["Nice", "to", "see", "you"];
+const AnimatedImage = Animated.createAnimatedComponent(Image);
+const { width, height } = Dimensions.get("window");
 
 export default function App() {
-  const translateX = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const focalX = useSharedValue(0);
+  const focalY = useSharedValue(0);
 
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    translateX.value = event.contentOffset.x;
+  const pinchHandler = useAnimatedGestureHandler({
+    onStart: () => {},
+    onActive: (event, context) => {
+      scale.value = event.scale;
+      focalX.value = event.focalX;
+      focalY.value = event.focalY;
+    },
+    onEnd: () => {
+      scale.value = withTiming(1);
+    },
+  });
+
+  const reanimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: focalX.value },
+        { translateY: focalY.value },
+        { translateX: -(width * 0.8) / 2 },
+        { translateY: -(height * 0.8) / 2 },
+        { scale: scale.value },
+        { translateX: -focalX.value },
+        { translateY: -focalY.value },
+        { translateX: (width * 0.8) / 2 },
+        { translateY: (height * 0.8) / 2 },
+      ],
+    };
   });
 
   return (
-    <Animated.ScrollView
-      pagingEnabled
-      onScroll={scrollHandler}
-      scrollEventThrottle={16}
-      horizontal
-      contentContainerStyle={styles.container}
-    >
-      {Words.map((title, index) => {
-        return (
-          <Page
-            key={index.toString()}
-            title={title}
-            index={index}
-            translateX={translateX}
-          />
-        );
-      })}
-    </Animated.ScrollView>
+    <PinchGestureHandler onGestureEvent={pinchHandler}>
+      <Animated.View style={styles.animationContainer}>
+        <AnimatedImage
+          source={BackgroundImg}
+          style={[styles.background, reanimatedStyle]}
+        />
+      </Animated.View>
+    </PinchGestureHandler>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    flex: 1,
+    backgroundColor: "green",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  animationContainer: {
+    flex: 1,
+    backgroundColor: "#4f5555",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  background: {
+    width: width * 0.8,
+    height: height * 0.8,
   },
 });
