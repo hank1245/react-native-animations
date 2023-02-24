@@ -5,6 +5,7 @@ import {
   Text,
   View,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { TapGestureHandler } from "react-native-gesture-handler";
@@ -19,9 +20,11 @@ import Animated, {
 
 function Item({ item }) {
   const pressed = useSharedValue(false);
+  const [count, setCount] = useState(0);
   const tapHandler = useAnimatedGestureHandler({
     onStart: (event) => {
       pressed.value = true;
+      runOnJS(setCount)(count + 1);
     },
     onFinish: (event) => {
       pressed.value = false;
@@ -39,13 +42,19 @@ function Item({ item }) {
       <Animated.View
         style={[styles.button, { left: item.x }, { bottom: item.y }, itemStyle]}
       >
-        <Text>{item.type}</Text>
+        <Text>{count}</Text>
       </Animated.View>
     </TapGestureHandler>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
   button: {
     position: "absolute",
     borderRadius: "50%",
@@ -54,6 +63,7 @@ const styles = StyleSheet.create({
     height: 70,
     justifyContent: "center",
     alignItems: "center",
+    left: 0,
   },
 });
 
