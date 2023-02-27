@@ -5,13 +5,10 @@ import {
   Text,
   View,
   Dimensions,
+  Modal,
 } from "react-native";
 import BackgroundImg from "./assets/image.jpeg";
 import React, { useRef, useState } from "react";
-import {
-  PinchGestureHandler,
-  TapGestureHandler,
-} from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { MOCK_DATA } from "./constant";
 import Item from "./components/Item";
@@ -24,7 +21,9 @@ export default function App() {
       <Animated.View style={styles.animationContainer}>
         <Image source={BackgroundImg} style={[styles.background]} />
         {MOCK_DATA.map((item, index) => (
-          <Item key={index} item={item} />
+          <React.Fragment key={item.macAddress}>
+            <Item key={index} item={item} />
+          </React.Fragment>
         ))}
       </Animated.View>
     </View>

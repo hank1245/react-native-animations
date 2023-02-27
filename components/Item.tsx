@@ -1,5 +1,5 @@
-import { StyleSheet } from "react-native";
-import React, { useEffect } from "react";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -14,6 +14,10 @@ function Item({ item }) {
   const scale2 = useSharedValue(0.1);
   const rippleOpacity3 = useSharedValue(1);
   const scale3 = useSharedValue(0.1);
+  const [modalVisible, setModalVisible] = useState(false);
+  const onPress = () => {
+    setModalVisible(true);
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -53,15 +57,35 @@ function Item({ item }) {
 
   return (
     <>
-      <Animated.View
-        style={[styles.button, { left: item.x }, { bottom: item.y }, rStyle1]}
-      ></Animated.View>
-      <Animated.View
-        style={[styles.button, { left: item.x }, { bottom: item.y }, rStyle2]}
-      ></Animated.View>
-      <Animated.View
-        style={[styles.button, { left: item.x }, { bottom: item.y }, rStyle3]}
-      ></Animated.View>
+      <Pressable onPress={onPress} style={styles.press}>
+        <Animated.View
+          style={[styles.button, { left: item.x }, { bottom: item.y }, rStyle1]}
+        ></Animated.View>
+        <Animated.View
+          style={[styles.button, { left: item.x }, { bottom: item.y }, rStyle2]}
+        ></Animated.View>
+        <Animated.View
+          style={[styles.button, { left: item.x }, { bottom: item.y }, rStyle3]}
+        ></Animated.View>
+      </Pressable>
+      <Modal
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(!modalVisible)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>{item.type}</Text>
+            <Text style={styles.modalText}>{item.macAddress}</Text>
+            <Pressable
+              style={[styles.modalButton, styles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={styles.buttonText}>닫기</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -69,8 +93,9 @@ function Item({ item }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    position: "relative",
+  },
+  press: {
     position: "relative",
   },
   button: {
@@ -89,6 +114,44 @@ const styles = StyleSheet.create({
     backgroundColor: "#063970",
     position: "absolute",
     transform: [{ scale: 0.15 }],
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  modalButton: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
