@@ -1,5 +1,4 @@
 import React from "react";
-import { View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   withTiming,
@@ -12,7 +11,6 @@ function ListItem({ item, viewableItems }) {
         .filter((item) => item.isViewable)
         .find((viewableItem) => viewableItem.item.id === item.id)
     );
-
     return {
       opacity: withTiming(isVisible ? 1 : 0),
       transform: [
@@ -22,6 +20,7 @@ function ListItem({ item, viewableItems }) {
       ],
     };
   });
+
   return (
     <Animated.View
       style={[

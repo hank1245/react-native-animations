@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, View } from "react-native";
 import React, { useRef } from "react";
 import ListItem from "./components/ListItem";
 import { useSharedValue } from "react-native-reanimated";
@@ -12,7 +12,6 @@ export default function App() {
     viewableItems.value = items;
   };
   const viewabilityConfigCallbackPairs = useRef([{ onViewableItemsChanged }]);
-
   return (
     <View style={styles.container}>
       <FlatList
